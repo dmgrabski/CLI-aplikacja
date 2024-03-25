@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid'); // Import UUID
 
 // Zmienna contactsPath przechowuje ścieżkę do pliku contacts.json w folderze db
 const contactsPath = path.join(__dirname, 'db', 'contacts.json');
@@ -8,7 +9,8 @@ const contactsPath = path.join(__dirname, 'db', 'contacts.json');
 function listContacts() {
   fs.readFile(contactsPath, 'utf-8', (err, data) => {
     if (err) throw err;
-    console.log(data);
+    const contacts = JSON.parse(data);
+    console.table(contacts); // Wyświetlanie w formie tabeli
   });
 }
 
@@ -39,8 +41,8 @@ function removeContact(contactId) {
 function addContact(name, email, phone) {
   fs.readFile(contactsPath, 'utf-8', (err, data) => {
     if (err) throw err;
-    const contacts = JSON.parse(data);
-    const newContact = { id: Math.max(...contacts.map(contact => contact.id)) + 1, name, email, phone };
+    const contacts = JSON.parse(data) || []; // Dodano zabezpieczenie na wypadek pustego pliku
+    const newContact = { id: uuidv4(), name, email, phone }; // Użycie uuid do generowania ID
     contacts.push(newContact);
     fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2), err => {
       if (err) throw err;
